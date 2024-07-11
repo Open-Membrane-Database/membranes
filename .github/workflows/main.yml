@@ -1,0 +1,34 @@
+name: Update JSON Files
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # Runs every day at midnight
+  workflow_dispatch:  # Allows manual triggering of the workflow
+
+jobs:
+  update-json:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Fetch JSON from URL 1
+      run: curl -o membranes-srnf.json https://api.openmembranedatabase.org/membranes-srnf
+
+    - name: Fetch JSON from URL 2
+      run: curl -o membranes.json https://api.openmembranedatabase.org/membranes
+
+    - name: Configure Git
+      run: |
+        git config --global user.name 'github-actions[bot]'
+        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+    - name: Commit files
+      run: |
+        DATE=$(date +'%Y-%m-%d')
+        git add membranes-srnf.json membranes.json
+        git commit -m "$DATE"
+        git push
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
