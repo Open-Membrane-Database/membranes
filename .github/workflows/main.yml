@@ -24,10 +24,16 @@ jobs:
         git config --global user.name 'github-actions[bot]'
         git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
-    - name: Commit files
+    - name: Check for changes
+      id: git_diff
+      run: |
+        git add membranes-srnf.json membranes.json
+        git diff --cached --quiet || echo "Changes detected"
+
+    - name: Commit and Push changes
+      if: steps.git_diff.outputs.changes_detected == 'Changes detected'
       run: |
         DATE=$(date +'%Y-%m-%d')
-        git add membranes-srnf.json membranes.json
         git commit -m "$DATE"
         git push
       env:
